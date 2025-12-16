@@ -164,33 +164,4 @@ const verify = async (req, res) => {
     }
 };
 
-// @desc    Release Machine
-// @route   POST /api/release
-// @access  Public
-const release = async (req, res) => {
-    const { machineId, password } = req.body;
-
-    try {
-        const user = await User.findOne({ currentMachineId: machineId });
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'No user found for this machine.' });
-        }
-
-        if (password && user.password !== password) {
-            return res.status(401).json({ success: false, message: 'Invalid password' });
-        }
-
-        user.currentMachineId = null;
-        await user.save();
-        console.log(`[AUTH] Machine ${machineId} released from user ${user.email}`);
-
-        res.json({ success: true, message: 'Machine Released' });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
-
-module.exports = { signup, verifyEmail, googleAuth, verify, release };
+module.exports = { signup, verifyEmail, googleAuth, verify };
