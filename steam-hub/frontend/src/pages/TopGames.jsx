@@ -1,46 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Play, Users, ShieldCheck, Gamepad2, ShoppingCart, LifeBuoy } from 'lucide-react';
 
+import axios from 'axios';
+
 const TopGames = () => {
-    // Game Data for Carousel
-    const games = [
-        {
-            id: 1,
-            title: "Experience GTAV Enhanced",
-            subtitle: "The Best Version on PC",
-            tag: "GRAND THEFT AUTO V",
-            image: "/images/hero/gta5-bg.jpg",
-            logo: "/images/hero/gta5-logo.png",
-            color: "text-[#8000FF]"
-        },
-        {
-            id: 2,
-            title: "Be Greater. Together.",
-            subtitle: "Experience the next chapter.",
-            tag: "MARVEL'S SPIDER-MAN 2",
-            image: "/images/hero/spiderman2-bg.jpg",
-            logo: "/images/hero/spiderman2-logo.png",
-            color: "text-red-500"
-        },
-        {
-            id: 3,
-            title: "Survival is Just the Beginning",
-            subtitle: "Reimagine the horror.",
-            tag: "RESIDENT EVIL 4",
-            image: "/images/hero/re4-bg.jpg",
-            logo: "/images/hero/re4-logo.png",
-            color: "text-red-700"
-        },
-        {
-            id: 4,
-            title: "Myths Are Made to Be Broken",
-            subtitle: "The saga continues.",
-            tag: "GOD OF WAR RAGNARÖK",
-            image: "/images/hero/gow-bg.jpg",
-            logo: "/images/hero/gow-logo.png",
-            color: "text-blue-400"
-        }
-    ];
+    // Game Data State
+    const [games, setGames] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch Top Games
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                const res = await axios.get('http://localhost:3000/api/games/top');
+                if (res.data.success) {
+                    // Map backend data to frontend structure
+                    const mappedGames = res.data.games.map(game => ({
+                        id: game._id,
+                        title: game.name,
+                        subtitle: game.about || "Experience the game.", // Fallback
+                        tag: game.name.toUpperCase(),
+                        image: game.images.banner,
+                        logo: getLocalLogo(game.steam_id), // Use local logo helper
+                        // Helper to assign colors based on game (hardcoded mapping for style)
+                        color: getGameColor(game.steam_id)
+                    }));
+                    setGames(mappedGames);
+                }
+            } catch (err) {
+                console.error("Failed to fetch top games:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGames();
+    }, []);
+
+    // Helper for local logos
+    const getLocalLogo = (steamId) => {
+        const logos = {
+            "271590": "/images/hero/gta.png",
+            "2651280": "/images/hero/mar.png",
+            "2050650": "/images/hero/re4.png",
+            "2322010": "/images/hero/gow.png"
+        };
+        return logos[steamId] || "/images/hero/gta.png"; // Default fallback
+    };
+
+    // Helper for colors
+    const getGameColor = (steamId) => {
+        const colors = {
+            "271590": "text-[#8000FF]", // GTA V
+            "2651280": "text-red-500",  // Spiderman 2
+            "2050650": "text-red-700",  // RE4
+            "2322010": "text-blue-400"  // GOW
+        };
+        return colors[steamId] || "text-white";
+    };
+
+    // If loading or empty, show fallback or loader (optional)
+    // For now, if empty, we might want to keep the hardcoded ones as fallback?
+    // The user explicitly asked to "take all these data from database", so we trust the DB.
 
     const [current, setCurrent] = useState(0);
 
@@ -85,15 +106,12 @@ const TopGames = () => {
                                         <img
                                             src={game.logo}
                                             alt={`${game.tag} Logo`}
-                                            className="w-full h-auto drop-shadow-2xl object-contain filter brightness-125 saturate-125"
+                                            className="w-full h-auto drop-shadow-2xl object-contain filter brightness-125 saturate-125 hover:scale-105 transition-transform duration-300"
                                         />
                                     </div>
 
                                     {/* Info Section */}
                                     <div className="flex flex-col items-start text-left mb-4">
-                                        <span className={`text-xs md:text-sm font-black uppercase tracking-[0.2em] mb-2 ${game.color} drop-shadow-md`}>
-                                            {game.tag}
-                                        </span>
                                         <h2 className="text-white text-3xl md:text-5xl font-extrabold uppercase tracking-tight mb-2 leading-none drop-shadow-xl max-w-2xl">
                                             {game.title}
                                         </h2>
@@ -139,6 +157,80 @@ const TopGames = () => {
                     </div>
                 </div>
             </ScrollReveal>
+
+            {/* Game Names Marquee Section */}
+            <div className="w-full bg-black py-16 overflow-hidden">
+                <div className="space-y-6">
+                    {/* Row 1 - Moving Right */}
+                    <div className="flex gap-8 animate-marquee-right">
+                        {[
+                            "Grand Theft Auto V", "Red Dead Redemption 2", "Cyberpunk 2077", "The Witcher 3",
+                            "Elden Ring", "God of War", "Horizon Zero Dawn", "Spider-Man 2",
+                            "Grand Theft Auto V", "Red Dead Redemption 2", "Cyberpunk 2077", "The Witcher 3",
+                            "Elden Ring", "God of War", "Horizon Zero Dawn", "Spider-Man 2"
+                        ].map((game, i) => (
+                            <div key={i} className="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+                                <span className="text-white font-bold text-lg uppercase tracking-wider whitespace-nowrap">
+                                    {game}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Row 2 - Moving Left */}
+                    <div className="flex gap-8 animate-marquee-left">
+                        {[
+                            "Resident Evil 4", "Final Fantasy XVI", "Starfield", "Baldur's Gate 3",
+                            "Hogwarts Legacy", "Dead Space", "Forza Horizon 5", "Halo Infinite",
+                            "Resident Evil 4", "Final Fantasy XVI", "Starfield", "Baldur's Gate 3",
+                            "Hogwarts Legacy", "Dead Space", "Forza Horizon 5", "Halo Infinite"
+                        ].map((game, i) => (
+                            <div key={i} className="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+                                <span className="text-white font-bold text-lg uppercase tracking-wider whitespace-nowrap">
+                                    {game}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Row 3 - Moving Right */}
+                    <div className="flex gap-8 animate-marquee-right-slow">
+                        {[
+                            "Call of Duty: Modern Warfare", "Assassin's Creed Valhalla", "Far Cry 6", "Watch Dogs Legion",
+                            "Ghost of Tsushima", "The Last of Us", "Uncharted 4", "Death Stranding",
+                            "Call of Duty: Modern Warfare", "Assassin's Creed Valhalla", "Far Cry 6", "Watch Dogs Legion",
+                            "Ghost of Tsushima", "The Last of Us", "Uncharted 4", "Death Stranding"
+                        ].map((game, i) => (
+                            <div key={i} className="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+                                <span className="text-white font-bold text-lg uppercase tracking-wider whitespace-nowrap">
+                                    {game}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Inline Styles for Marquee Animations */}
+                <style>{`
+                    @keyframes marquee-right {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-50%); }
+                    }
+                    @keyframes marquee-left {
+                        0% { transform: translateX(-50%); }
+                        100% { transform: translateX(0); }
+                    }
+                    .animate-marquee-right {
+                        animation: marquee-right 40s linear infinite;
+                    }
+                    .animate-marquee-left {
+                        animation: marquee-left 40s linear infinite;
+                    }
+                    .animate-marquee-right-slow {
+                        animation: marquee-right 60s linear infinite;
+                    }
+                `}</style>
+            </div>
 
             {/* Game Library Infinite Scroll Section */}
             <div className="relative w-full bg-black py-24 overflow-hidden group">

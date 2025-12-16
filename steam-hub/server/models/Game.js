@@ -45,6 +45,11 @@ const gameSchema = mongoose.Schema({
         default: 0,
         required: true
     },
+    tags: {
+        type: [String],
+        default: [],
+        index: true
+    },
     isEnabled: {
         type: Boolean,
         default: true,

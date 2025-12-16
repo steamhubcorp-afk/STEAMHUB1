@@ -27,34 +27,38 @@ const Cart = () => {
 
                             <div className="bg-[#1a1a1a] rounded-xl p-6 shadow-xl border border-zinc-800 space-y-6">
                                 {cartItems.map((item) => (
-                                    <div key={`${item.id}-${item.duration}`} className="flex flex-col sm:flex-row gap-6 relative group border-b border-zinc-800 pb-6 last:border-0 last:pb-0">
-                                        {/* Remove Button */}
-                                        <button
-                                            onClick={() => removeFromCart(item.id, item.duration)}
-                                            className="absolute top-0 right-0 text-gray-400 hover:text-red-500 transition-colors bg-zinc-900 rounded-full p-1"
-                                            title="Remove item"
-                                        >
-                                            <X size={16} />
-                                        </button>
-
-                                        {/* Item Image */}
-                                        <div className="w-full sm:w-48 aspect-video rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0">
-                                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                                        </div>
-
-                                        {/* Item Details */}
-                                        <div className="flex-grow pr-8">
-                                            <h3 className="text-xl font-bold mb-1">{item.title}</h3>
-                                            <div className="flex flex-wrap gap-2 text-sm text-gray-400 mb-4">
-                                                <span className="bg-zinc-800 px-2 py-0.5 rounded text-xs uppercase font-bold tracking-wider text-[#8000FF]">
-                                                    {item.duration}
-                                                </span>
-                                                <span>• PC Edition</span>
+                                    <div key={`${item.id}-${item.duration}`} className="flex flex-col gap-4 relative border-b border-zinc-800 pb-6 last:border-0 last:pb-0">
+                                        {/* Top Row: Image and Details */}
+                                        <div className="flex flex-col sm:flex-row gap-4">
+                                            {/* Item Image */}
+                                            <div className="w-full sm:w-48 aspect-video rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0">
+                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                                             </div>
 
-                                            {/* Quantity / Device Selector */}
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded border border-zinc-700">
+                                            {/* Item Details */}
+                                            <div className="flex-grow">
+                                                <div className="flex justify-between items-start gap-4 mb-2">
+                                                    <h3 className="text-xl font-bold">{item.title}</h3>
+
+                                                    {/* Remove Button */}
+                                                    <button
+                                                        onClick={() => removeFromCart(item.id, item.duration)}
+                                                        className="text-gray-400 hover:text-red-500 transition-colors bg-zinc-900 rounded-full p-2 flex-shrink-0"
+                                                        title="Remove item"
+                                                    >
+                                                        <X size={16} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2 text-sm text-gray-400 mb-3">
+                                                    <span className="bg-zinc-800 px-3 py-1 rounded text-xs uppercase font-bold tracking-wider text-[#8000FF]">
+                                                        {item.duration}
+                                                    </span>
+                                                    <span className="bg-zinc-800 px-3 py-1 rounded text-xs">PC Edition</span>
+                                                </div>
+
+                                                {/* Quantity / Device Selector */}
+                                                <div className="flex items-center gap-2 bg-zinc-900 px-3 py-2 rounded border border-zinc-700 w-fit">
                                                     <Monitor size={14} className="text-gray-400" />
                                                     <label className="text-xs text-gray-400 mr-1">Devices:</label>
                                                     <select
@@ -70,10 +74,19 @@ const Cart = () => {
                                             </div>
                                         </div>
 
-                                        {/* Price */}
-                                        <div className="flex flex-col justify-end sm:justify-start items-end min-w-[80px]">
-                                            <span className="text-xl font-bold">₹{item.price}</span>
-                                            <span className="text-xs text-gray-500">each</span>
+                                        {/* Bottom Row: Price and Duration Info */}
+                                        <div className="flex items-center gap-6 bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs text-gray-400 uppercase tracking-wider">Price:</span>
+                                                <span className="text-xl font-bold text-white">₹{item.price}</span>
+                                            </div>
+                                            <div className="h-8 w-px bg-zinc-700"></div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs text-gray-400 uppercase tracking-wider">Duration:</span>
+                                                <span className="text-xl font-bold text-[#8000FF]">
+                                                    {item.duration === 'Permanent' ? '∞' : item.duration === '7 Days' ? '7 Days' : '30 Days'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

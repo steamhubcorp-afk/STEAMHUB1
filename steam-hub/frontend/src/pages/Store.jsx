@@ -1,64 +1,59 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import FloatingCartButton from '../components/FloatingCartButton';
+import axios from 'axios';
 
 const Store = () => {
-    const navigate = useNavigate(); // Added navigate hook here for the floating button
+    const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Single Placeholder Image for all games as requested
-    const placeholderImg = "https://placehold.co/600x400/202020/FFFFFF/png?text=GAME+IMAGE";
+    // Define tag categories
+    const tagCategories = ['top', 'trending', 'survival', 'free', 'shooting'];
 
-    // Data with single image
-    const categories = [
-        {
-            title: "Top Games",
-            games: [
-                { id: 1, title: "Grand Theft Auto V", price: "$29.99", desc: "The open-world standard.", image: placeholderImg },
-                { id: 2, title: "Red Dead Redemption 2", price: "$59.99", desc: "Epic tale of life in America.", image: placeholderImg },
-                { id: 3, title: "Cyberpunk 2077", price: "$59.99", desc: "Open-world, action-adventure.", image: placeholderImg },
-                { id: 4, title: "Elden Ring", price: "$59.99", desc: "Fantasy action-RPG adventure.", image: placeholderImg },
-                { id: 5, title: "God of War", price: "$49.99", desc: "Kratos returns.", image: placeholderImg },
-            ]
-        },
-        {
-            title: "Trending",
-            games: [
-                { id: 6, title: "Baldur's Gate 3", price: "$59.99", desc: "Gather your party.", image: placeholderImg },
-                { id: 7, title: "Starfield", price: "$69.99", desc: "Explore the stars.", image: placeholderImg },
-                { id: 8, title: "Call of Duty: MW3", price: "$69.99", desc: "The war has changed.", image: placeholderImg },
-                { id: 9, title: "Spider-Man 2", price: "$69.99", desc: "Be greater together.", image: placeholderImg },
-            ]
-        },
-        {
-            title: "Best Survival",
-            games: [
-                { id: 10, title: "Resident Evil 4", price: "$59.99", desc: "Survival horror reborn.", image: placeholderImg },
-                { id: 11, title: "The Forest", price: "$19.99", desc: "Survive the night.", image: placeholderImg },
-                { id: 12, title: "Rust", price: "$39.99", desc: "The only aim is to survive.", image: placeholderImg },
-                { id: 13, title: "Subnautica", price: "$29.99", desc: "Descend into the depths.", image: placeholderImg },
-            ]
-        },
-        {
-            title: "Free Games",
-            games: [
-                { id: 14, title: "Fortnite", price: "Free", desc: "Battle Royale.", image: placeholderImg },
-                { id: 15, title: "Apex Legends", price: "Free", desc: "Character-based shooter.", image: placeholderImg },
-                { id: 16, title: "Warframe", price: "Free", desc: "Ninjas play free.", image: placeholderImg },
-                { id: 17, title: "Destiny 2", price: "Free", desc: "Defend humanity.", image: placeholderImg },
-            ]
-        },
-        {
-            title: "Shooting",
-            games: [
-                { id: 18, title: "DOOM Eternal", price: "$39.99", desc: "Raze Hell.", image: placeholderImg },
-                { id: 19, title: "Overwatch 2", price: "Free", desc: "Team-based hero shooter.", image: placeholderImg },
-                { id: 20, title: "Counter-Strike 2", price: "Free", desc: "The competitive FPS.", image: placeholderImg },
-                { id: 21, title: "Rainbow Six Siege", price: "$19.99", desc: "Tactical shooter.", image: placeholderImg },
-            ]
-        }
-    ];
+    useEffect(() => {
+        const fetchGamesByTags = async () => {
+            try {
+                // Fetch all games with the specified tags
+                const res = await axios.get(`http://localhost:3000/api/games/by-tags?tags=${tagCategories.join(',')}`);
+
+                if (res.data.success) {
+                    // Group games by tags
+                    const groupedGames = tagCategories.map(tag => {
+                        const gamesForTag = res.data.games.filter(game => game.tags.includes(tag));
+                        return {
+                            title: tag,
+                            games: gamesForTag.map(game => ({
+                                id: game._id,
+                                title: game.name,
+                                price: game.price === 0 ? 'Free' : `₹${game.price}`,
+                                desc: game.about || 'No description available.',
+                                image: game.images?.banner || 'https://placehold.co/600x400/202020/FFFFFF/png?text=GAME+IMAGE'
+                            }))
+                        };
+                    });
+
+                    setCategories(groupedGames);
+                }
+            } catch (err) {
+                console.error('Failed to fetch games by tags:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGamesByTags();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="bg-[#121212] min-h-screen text-white pt-24 pb-20 px-4 md:px-8 flex items-center justify-center">
+                <div className="text-2xl font-bold">Loading Store...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-[#121212] min-h-screen text-white pt-24 pb-20 px-4 md:px-8 relative">
@@ -141,8 +136,8 @@ const GameCard = ({ game }) => {
 
     const handleAddToCart = (e) => {
         e.stopPropagation(); // Prevent card click from triggering
-        // Add to cart logic: Default to "Permanent" duration and $300 price (or game price if different logic desired, but adhering to the 10/50/300 structure)
-        addToCart(game, "Permanent", "₹300");
+        // Add to cart with game's actual price and 7 Days duration as default for quick add
+        addToCart(game, "7 Days", game.price);
     };
 
     return (

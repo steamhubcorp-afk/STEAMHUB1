@@ -7,18 +7,29 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
 
-    const addToCart = (product, duration = 'Permanent', price = '300', qty = 1) => {
+    const addToCart = (product, duration = '7 Days', price = '10', qty = 1) => {
         setCartItems(prev => {
+            // Normalize product data
+            const normalizedItem = {
+                id: product.id || product._id,
+                title: product.title || product.name,
+                image: product.image || product.images?.banner || product.images?.main || "https://placehold.co/600x400/202020/FFFFFF/png?text=GAME",
+                price: price || product.price,
+                duration,
+                qty
+            };
+
             // Check if item with same ID AND duration exists
-            const existing = prev.find(item => item.id === product.id && item.duration === duration);
+            const existing = prev.find(item => item.id === normalizedItem.id && item.duration === duration);
+
             if (existing) {
                 return prev.map(item =>
-                    (item.id === product.id && item.duration === duration)
+                    (item.id === normalizedItem.id && item.duration === duration)
                         ? { ...item, qty: item.qty + qty }
                         : item
                 );
             }
-            return [...prev, { ...product, duration, price, qty }];
+            return [...prev, normalizedItem];
         });
     };
 
