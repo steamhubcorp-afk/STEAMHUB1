@@ -1,0 +1,38 @@
+require('dotenv').config();
+const express = require('express');
+const path = require('path');
+const connectDB = require('./config/db');
+const cors = require('cors');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Connect to Database
+connectDB();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api', require('./routes/authRoutes'));
+app.use('/api/games', require('./routes/gameRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.get('/health', (req, res) => {
+  res.send('OK');
+})
+
+// Serve Static Payload (for now)
+// app.use(express.static(path.join(__dirname, 'public')));
+// Be more specific to allow accessing generated payloads
+app.use('/payloads', express.static(path.join(__dirname, 'public/payloads')));
+
+// Basic Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
+});
