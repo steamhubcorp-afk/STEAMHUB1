@@ -4,11 +4,24 @@ const librarySchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        unique: true
     },
     games: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Game'
+        game: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Game',
+            required: true
+        },
+        expirationDate: {
+            type: Date,
+            required: true,
+            index: true
+        },
+        isActive: {
+            type: Boolean,
+            default: true
+        }
     }]
 }, {
     timestamps: true

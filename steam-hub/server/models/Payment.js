@@ -6,7 +6,16 @@ const paymentSchema = mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    amount: {
+    games: [{
+        game: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Game',
+            required: true
+        },
+        amount: { type: Number, required: true },
+        hours: { type: Number, required: true } // Duration purchased
+    }],
+    totalAmount: {
         type: Number,
         required: true
     },
@@ -20,7 +29,8 @@ const paymentSchema = mongoose.Schema({
         default: 'pending'
     },
     transactionId: {
-        type: String
+        type: String,
+        required: true
     }
 }, {
     timestamps: true
