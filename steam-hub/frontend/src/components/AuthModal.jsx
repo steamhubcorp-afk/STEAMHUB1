@@ -4,9 +4,10 @@ import { X, Eye, EyeOff, Mail, Lock, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AuthModal = () => {
-    const { isModalOpen, closeModal, login } = useAuth();
+    const { isModalOpen, closeModal, login, signup, isLoading, error } = useAuth();
     const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
     const [showPassword, setShowPassword] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Form inputs state
     const [email, setEmail] = useState('');
@@ -15,15 +16,20 @@ const AuthModal = () => {
 
     if (!isModalOpen) return null;
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you would normally handle API calls
-        // For now, we mock success
-        login(email);
-        // Reset form
-        setEmail('');
-        setPassword('');
-        setName('');
+        setSuccessMessage('');
+
+        if (isLogin) {
+            await login(email, password);
+        } else {
+            const success = await signup(name, email, password);
+            if (success) {
+                setSuccessMessage('Signup successful! Please check your email to verify your account.');
+                // Optional: switch to login view or keep showing success
+                // setIsLogin(true); 
+            }
+        }
     };
 
     return (
@@ -82,6 +88,18 @@ const AuthModal = () => {
                                 ? 'Enter your details to access your library.'
                                 : 'Join the community and start playing.'}
                         </p>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        {successMessage && (
+                            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-500 text-sm">
+                                {successMessage}
+                            </div>
+                        )}
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {!isLogin && (
@@ -153,9 +171,14 @@ const AuthModal = () => {
 
                             <button
                                 type="submit"
-                                className="w-full bg-[#8000FF] hover:bg-[#9a33ff] text-white font-bold py-3.5 rounded-lg transition-all transform hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(128,0,255,0.4)] mt-4"
+                                disabled={isLoading}
+                                className="w-full bg-[#8000FF] hover:bg-[#9a33ff] disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-lg transition-all transform hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(128,0,255,0.4)] mt-4 flex items-center justify-center"
                             >
-                                {isLogin ? 'Log In' : 'Sign Up'}
+                                {isLoading ? (
+                                    <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    isLogin ? 'Log In' : 'Sign Up'
+                                )}
                             </button>
                         </form>
 
