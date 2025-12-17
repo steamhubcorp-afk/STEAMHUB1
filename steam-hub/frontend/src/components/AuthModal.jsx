@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import { X, Eye, EyeOff, Mail, Lock, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AuthModal = () => {
-    const { isModalOpen, closeModal, login, signup, isLoading, error } = useAuth();
+    const { isModalOpen, closeModal, login, signup, googleLogin, isLoading, error } = useAuth();
     const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
     const [showPassword, setShowPassword] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -101,6 +102,7 @@ const AuthModal = () => {
                             </div>
                         )}
 
+
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {!isLogin && (
                                 <div className="space-y-2">
@@ -193,6 +195,24 @@ const AuthModal = () => {
                                 </button>
                             </p>
                         </div>
+
+
+                        <div className="flex items-center gap-4 my-6">
+                            <div className="h-px bg-zinc-800 flex-1" />
+                            <span className="text-sm text-gray-500 font-bold uppercase tracking-wider">OR</span>
+                            <div className="h-px bg-zinc-800 flex-1" />
+                        </div>
+                        <div className="flex justify-center mb-6">
+                            <GoogleLogin
+                                onSuccess={googleLogin}
+                                onError={() => console.log('Login Failed')}
+                                theme="filled_black"
+                                shape="pill"
+                                text="signin_with"
+                                width="300"
+                            />
+                        </div>
+
                     </div>
                 </div>
             </div>

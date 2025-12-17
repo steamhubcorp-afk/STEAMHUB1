@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,8 +12,13 @@ const port = process.env.PORT || 3000;
 connectDB();
 
 // Middleware
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Frontend URL
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use('/api', require('./routes/authRoutes'));

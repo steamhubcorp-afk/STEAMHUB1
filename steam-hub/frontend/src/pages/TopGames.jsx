@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Play, Users, ShieldCheck, Gamepad2, ShoppingCart, LifeBuoy } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 import axios from 'axios';
 
 const TopGames = () => {
+    const { user } = useAuth();
     // Game Data State
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ const TopGames = () => {
                         title: game.name,
                         subtitle: game.about || "Experience the game.", // Fallback
                         tag: game.name.toUpperCase(),
-                        image: game.images.banner,
+                        image: game.images.main,
                         logo: getLocalLogo(game.steam_id), // Use local logo helper
                         // Helper to assign colors based on game (hardcoded mapping for style)
                         color: getGameColor(game.steam_id)
@@ -72,6 +74,26 @@ const TopGames = () => {
         return () => clearInterval(timer);
     }, [games.length]);
 
+    // Library State
+    const [libraryGames, setLibraryGames] = useState([]);
+
+    useEffect(() => {
+        if (user) {
+            const fetchLibrary = async () => {
+                try {
+                    // Use user.id or user._id depending on what's available
+                    const res = await axios.get('http://localhost:3000/api/games/library', { withCredentials: true });
+                    if (res.data.success) {
+                        setLibraryGames(res.data.games);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch library:", err);
+                }
+            };
+            fetchLibrary();
+        }
+    }, [user]);
+
     return (
         <div className="w-full">
             {/* Hero Section with Carousel */}
@@ -88,14 +110,13 @@ const TopGames = () => {
                     return (
                         <div
                             key={game.id}
-                            className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${positionClass}`}
-                        >
+                            className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${positionClass}`}>
                             {/* Background Image */}
                             <div className="absolute inset-0 bg-black/40 z-10" />
                             <img
                                 src={game.image}
                                 alt={game.title}
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[5000ms] ease-linear scale-105"
+                                className="absolute inset-0 w-full h-full object-cover"
                             />
 
                             {/* Content Layout */}
@@ -233,56 +254,68 @@ const TopGames = () => {
             </div>
 
             {/* Game Library Infinite Scroll Section */}
-            <div className="relative w-full bg-black py-24 overflow-hidden group">
-                {/* Gradient Overlay for Text Readability */}
-                <div className="absolute inset-0 z-20 bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 z-20 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
+            {user && (
+                <div className="relative w-full bg-black py-24 overflow-hidden group">
+                    {/* Gradient Overlay for Text Readability */}
+                    <div className="absolute inset-0 z-20 bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 z-20 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
 
-                {/* Infinite Moving Wheel */}
-                <div className="flex gap-6 w-max animate-marquee opacity-60 group-hover:opacity-40 transition-opacity duration-500">
-                    {[
-                        "https://images.ctfassets.net/18izrhn535ym/3vvY3I8eOY44LIC9cIEJJJ/f7e466315db4b08a70ccdd9e624c9396/GTAV_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/2vUnWyJqEv4EUmevOAM2hq/3612b690f60c8cf2c862a89d4ad7922f/RDR2_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/5u9WnYViqn9HoW8mSVUMd2/52adae9d4956b6518b67b17e170edcfc/GTAO_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/6ienUAQprmBf0QZPpXz0u0/7a861bd7ec57f1a1e80159eadbfb0b80/LAN_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/4wWFzBALnnSniTII5QAQHR/370b8acfb0cb5d5c37a14d44e7f125b5/RDR_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/0kznl1I2NIxXz7X97Ohz5/74bbf8984860cebab82763470a9e387c/RDO_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/7offYwTuxRQry0qNq2rvL6/2a586551c3e83f2e91b779407f925527/GTA_Trilogy_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/5nOphTx9oYLoycXPGWiTHB/dd6d738ea3672f960bd9058115d15025/RDR_UN_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/3CTXrgEBR6W7KLbKsN2wLH/1fdd3074cb630097aebac2c0f00b4c72/Bully_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/2F0ghMZmoXRTVGsHvA0MnS/ac001ad6e415d2eba155e3c8182143a3/MP3_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/5of0prWsUkHlzzfCUjLKBk/6da1b3b4c279ff0c31117e0c9c8bc21d/GTA_ELC_FOB.jpg?w=1280&fm=webp",
-                        // Duplicates for seamless loop
-                        "https://images.ctfassets.net/18izrhn535ym/3vvY3I8eOY44LIC9cIEJJJ/f7e466315db4b08a70ccdd9e624c9396/GTAV_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/2vUnWyJqEv4EUmevOAM2hq/3612b690f60c8cf2c862a89d4ad7922f/RDR2_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/5u9WnYViqn9HoW8mSVUMd2/52adae9d4956b6518b67b17e170edcfc/GTAO_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/6ienUAQprmBf0QZPpXz0u0/7a861bd7ec57f1a1e80159eadbfb0b80/LAN_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/4wWFzBALnnSniTII5QAQHR/370b8acfb0cb5d5c37a14d44e7f125b5/RDR_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/0kznl1I2NIxXz7X97Ohz5/74bbf8984860cebab82763470a9e387c/RDO_FOB.jpg?w=1280&fm=webp",
-                        "https://images.ctfassets.net/18izrhn535ym/7offYwTuxRQry0qNq2rvL6/2a586551c3e83f2e91b779407f925527/GTA_Trilogy_FOB.jpg?w=1280&fm=webp",
-                    ].map((src, i) => (
-                        <div key={i} className="flex-shrink-0 w-[200px] md:w-[300px] aspect-[3/4] rounded-lg overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-                            <img src={src} alt="Game Cover" className="w-full h-full object-cover" />
+                    {/* Infinite Moving Wheel */}
+                    {libraryGames.length > 0 ? (
+                        <div className="flex gap-6 w-max animate-marquee opacity-60 group-hover:opacity-40 transition-opacity duration-500">
+                            {/* Repeat the list to ensure smooth marquee loop if few games */}
+                            {[...libraryGames, ...libraryGames, ...libraryGames].map((game, i) => {
+                                const isPermanent = new Date(game.expirationDate).getFullYear() > 2030; // Simple check for long duration
+                                const daysLeft = Math.ceil((new Date(game.expirationDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+                                return (
+                                    <div key={`${game.id}-${i}`} className="flex-shrink-0 w-[200px] md:w-[300px] aspect-[3/4] rounded-lg overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300 relative group/card border border-zinc-800">
+                                        <img src={game.image} alt={game.title} className="w-full h-full object-cover" />
+
+                                        {/* Status Badge */}
+                                        <div className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider bg-black/80 text-white backdrop-blur-md">
+                                            {isPermanent ? (
+                                                <span className="text-[#8000FF]">Owned</span>
+                                            ) : (
+                                                <span className={daysLeft < 3 ? "text-red-500" : "text-green-500"}>
+                                                    {daysLeft} Days Left
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="absolute inset-0 bg-black/80 opacity-0 group-hover/card:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 text-center">
+                                            <h4 className="text-white font-bold text-xl mb-2">{game.title}</h4>
+                                            <button className="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-[#8000FF] hover:text-white transition-colors">
+                                                Play Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    ))}
-                </div>
+                    ) : (
+                        <div className="relative z-30 flex flex-col items-center justify-center h-64 text-center px-4">
+                            <p className="text-gray-400 text-xl mb-4">Your library is empty.</p>
+                            <p className="text-gray-500 text-sm">Purchase games to see them here.</p>
+                        </div>
+                    )}
 
-                {/* Content Overlay (Bottom Left) */}
-                <div className="absolute bottom-0 left-0 z-30 p-8 md:p-16 max-w-2xl">
-                    <h2 className="text-white text-4xl md:text-6xl font-black tracking-tight mb-4 drop-shadow-xl">
-                        Game Library
-                    </h2>
-                    <p className="text-gray-300 text-lg md:text-xl font-medium mb-8 leading-relaxed max-w-lg drop-shadow-lg">
-                        All Rockstar Games titles, from upcoming releases like Grand Theft Auto VI to the classics.
-                    </p>
-                    <button className="group flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-400 transition-colors shadow-lg">
-                        <span>View All</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                </div>
+                    {/* Content Overlay (Bottom Left) */}
+                    <div className="absolute bottom-0 left-0 z-30 p-8 md:p-16 max-w-2xl">
+                        <h2 className="text-white text-4xl md:text-6xl font-black tracking-tight mb-4 drop-shadow-xl">
+                            Game Library
+                        </h2>
+                        <p className="text-gray-300 text-lg md:text-xl font-medium mb-8 leading-relaxed max-w-lg drop-shadow-lg">
+                            All Rockstar Games titles, from upcoming releases like Grand Theft Auto VI to the classics.
+                        </p>
+                        <button className="group flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-400 transition-colors shadow-lg">
+                            <span>View All</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
 
-                {/* Inline Styles for Animation */}
-                <style>{`
+                    {/* Inline Styles for Animation */}
+                    <style>{`
                     @keyframes marquee {
                         0% { transform: translateX(0); }
                         100% { transform: translateX(-50%); }
@@ -291,7 +324,8 @@ const TopGames = () => {
                         animation: marquee 40s linear infinite;
                     }
                 `}</style>
-            </div>
+                </div>
+            )}
 
             {/* Usage Section (Replaces Newswire) */}
             <div className="bg-[#121212] py-20 px-4">

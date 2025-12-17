@@ -26,6 +26,9 @@ const userSchema = mongoose.Schema({
     verificationToken: {
         type: String
     },
+    token: {
+        type: String
+    },
     // Reference to the distinct Library model
     library: {
         type: mongoose.Schema.Types.ObjectId,
