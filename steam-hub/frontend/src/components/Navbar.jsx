@@ -96,56 +96,56 @@ const Navbar = () => {
     }, [results.length]);
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-[#0f0f0f] text-white border-b border-gray-800">
+        <nav className="fixed top-0 w-full z-50 bg-[#0f0f0f] text-white border-b border-gray-800 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
 
                     {/* Logo / Brand */}
-                    <div className="flex-shrink-0 flex items-center">
-                        <Link to="/" className="text-2xl font-bold tracking-tighter uppercase font-sans">
-                            SteamHUB
+                    <div className="flex-shrink-0">
+                        <Link to="/" className="text-2xl font-black tracking-tighter uppercase">
+                            Steam<span className="text-[#8000FF]">HUB</span>
                         </Link>
                     </div>
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-8">
-                            <Link to="/top-games" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                    {/* Desktop Menu - Center */}
+                    <div className="hidden md:flex items-center flex-1 justify-center">
+                        <div className="flex items-center space-x-1">
+                            <Link to="/top-games" className="hover:text-[#8000FF] hover:bg-zinc-900/50 transition-all px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wide">
                                 Top Games
                             </Link>
-                            <Link to="/how-to-use" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                            <Link to="/how-to-use" className="hover:text-[#8000FF] hover:bg-zinc-900/50 transition-all px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wide">
                                 How to Use
                             </Link>
-                            <Link to="/store" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                            <Link to="/store" className="hover:text-[#8000FF] hover:bg-zinc-900/50 transition-all px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wide">
                                 Store
                             </Link>
                             {user && (
-                                <Link to="/library" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                                <Link to="/library" className="hover:text-[#8000FF] hover:bg-zinc-900/50 transition-all px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wide">
                                     Library
                                 </Link>
                             )}
-                            <Link to="/support" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                            <Link to="/support" className="hover:text-[#8000FF] hover:bg-zinc-900/50 transition-all px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wide">
                                 Support
                             </Link>
                         </div>
                     </div>
 
-                    {/* Icons (Search/User) */}
-                    <div className="hidden md:flex items-center space-x-6">
-                        {/* Search */}
-                        <div ref={searchRef} className="relative w-64">
+                    {/* Right Section - Search & User */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {/* Search - Compact */}
+                        <div ref={searchRef} className="relative w-52">
                             <input
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Search games..."
-                                className="w-full px-4 py-2 bg-zinc-900 text-white rounded-full border border-zinc-700 focus:outline-none focus:border-[#8000FF] transition-colors"
+                                className="w-full px-4 py-1.5 text-sm bg-zinc-900 text-white rounded-md border border-zinc-700 focus:outline-none focus:border-[#8000FF] transition-colors placeholder:text-gray-500"
                             />
 
                             {/* Results Dropdown */}
                             {results.length > 0 && (
-                                <div className="absolute top-full mt-2 w-full bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl max-h-96 overflow-y-auto z-50">
+                                <div className="absolute top-full mt-2 w-72 bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl max-h-96 overflow-y-auto z-50">
                                     {results.map((game, index) => (
                                         <div
                                             key={game._id}
@@ -170,8 +170,10 @@ const Navbar = () => {
                             )}
                         </div>
 
+                        {/* User Section */}
                         {user ? (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                {/* Download Button */}
                                 <button
                                     onClick={async () => {
                                         try {
@@ -180,7 +182,6 @@ const Navbar = () => {
 
                                             const toastId = toast.loading('Preparing download...');
 
-                                            // Call backend to get signed URL
                                             const response = await axios.get('http://localhost:3000/api/app/download', {
                                                 withCredentials: true,
                                                 headers: {
@@ -190,7 +191,6 @@ const Navbar = () => {
 
                                             if (response.data.success && response.data.downloadUrl) {
                                                 toast.success('Download started!', { id: toastId });
-                                                // Trigger download
                                                 window.location.href = response.data.downloadUrl;
                                             } else {
                                                 toast.error('Failed to get download link', { id: toastId });
@@ -198,23 +198,29 @@ const Navbar = () => {
                                         } catch (error) {
                                             console.error("Download Error:", error);
                                             const toast = (await import('react-hot-toast')).toast;
-                                            // Dismiss loading toast if it exists (we might need to manage ID better but simple calls usually work)
                                             toast.dismiss();
                                             toast.error(error.response?.data?.message || 'Download failed. Please try again.');
                                         }
                                     }}
-                                    className="px-3 py-1.5 bg-[#8000FF] hover:bg-[#6a00d4] text-white text-xs font-bold uppercase rounded transition-colors flex items-center gap-2"
+                                    className="px-4 py-1.5 bg-[#8000FF] hover:bg-[#6a00d4] text-white text-xs font-bold uppercase rounded-md transition-colors"
                                 >
-                                    <span>Download App</span>
+                                    Download App
                                 </button>
-                                <span className="text-sm font-bold text-[#8000FF]">{user.name}</span>
+
+                                {/* User Menu */}
+                                <div className="flex items-center gap-2 bg-zinc-900 rounded-md px-3 py-1.5 border border-zinc-800">
+                                    <User size={16} className="text-gray-400" />
+                                    <span className="text-sm font-semibold text-white">{user.name}</span>
+                                </div>
+
+                                {/* Logout Button */}
                                 <button
                                     onClick={() => {
                                         if (window.confirm("Are you sure you want to logout?")) {
                                             logout();
                                         }
                                     }}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-800 flex items-center gap-2 rounded"
+                                    className="px-4 py-1.5 bg-zinc-900 hover:bg-red-900/20 border border-zinc-800 hover:border-red-900 text-red-400 hover:text-red-300 text-xs font-bold uppercase rounded-md transition-all"
                                 >
                                     Logout
                                 </button>
@@ -222,10 +228,10 @@ const Navbar = () => {
                         ) : (
                             <button
                                 onClick={openModal}
-                                className="p-1 rounded-full text-gray-300 hover:text-white focus:outline-none"
-                                title="Login / Signup"
+                                className="px-5 py-2 bg-[#8000FF] hover:bg-[#6a00d4] text-white text-sm font-bold uppercase rounded-md transition-colors flex items-center gap-2"
                             >
-                                <User size={20} />
+                                <User size={16} />
+                                <span>Sign In</span>
                             </button>
                         )}
                     </div>

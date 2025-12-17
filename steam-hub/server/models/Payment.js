@@ -13,7 +13,8 @@ const paymentSchema = mongoose.Schema({
             required: true
         },
         amount: { type: Number, required: true },
-        hours: { type: Number, required: true } // Duration purchased
+        hours: { type: Number, required: true }, // Duration purchased
+        accumulatedHours: { type: Number, default: 0 } // Playtime accumulated
     }],
     totalAmount: {
         type: Number,

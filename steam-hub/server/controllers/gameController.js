@@ -88,14 +88,27 @@ const getUserLibrary = async (req, res) => {
 
         await library.save();
 
-        // 6. Return Populated Data for Frontend
+        // 6. Build aggregated library data with playtime
+        const gamePlaytimeMap = new Map(); // gameId -> total accumulated hours
+
+        payments.forEach(payment => {
+            payment.games.forEach(item => {
+                if (!item.game) return;
+                const gameId = item.game._id.toString();
+                const currentHours = gamePlaytimeMap.get(gameId) || 0;
+                gamePlaytimeMap.set(gameId, currentHours + (item.accumulatedHours || 0));
+            });
+        });
+
+        // 7. Return Populated Data for Frontend
         const games = Array.from(libraryState.values())
             .filter(data => data.expirationDate > new Date()) // Only return active to frontend
             .map(data => ({
                 id: data.game._id,
                 title: data.game.name,
                 image: data.game.images.main || data.game.images.banner,
-                expirationDate: data.expirationDate
+                expirationDate: data.expirationDate,
+                accumulatedHours: gamePlaytimeMap.get(data.game._id.toString()) || 0
             }));
 
         res.json({ success: true, games });
@@ -221,4 +234,56 @@ const getGameById = async (req, res) => {
     }
 };
 
-module.exports = { getGames, buyGames, getTopGames, getGamesByTags, getGameById, getUserLibrary };
+// @desc    Add Playtime to Game
+// @route   PUT /api/games/library/:gameId/playtime
+const addPlaytime = async (req, res) => {
+    const { gameId } = req.params;
+    const { hours = 6 } = req.body; // Default 6 hours
+
+    // 1. Get Token from Cookie
+    const token = req.cookies.token;
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Not authorized (No Token)' });
+    }
+
+    try {
+        // 2. Verify Token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key_123');
+        const userId = decoded.id;
+
+        // 3. Find the most recent payment for this user that includes this game
+        const payment = await Payment.findOne({
+            user: userId,
+            'games.game': gameId,
+            status: 'completed'
+        }).sort({ createdAt: -1 });
+
+        if (!payment) {
+            return res.status(404).json({ success: false, message: 'Game not found in your library' });
+        }
+
+        // 4. Find the specific game in the payment and add hours
+        const gameEntry = payment.games.find(g => g.game.toString() === gameId);
+        if (!gameEntry) {
+            return res.status(404).json({ success: false, message: 'Game not found in payment' });
+        }
+
+        gameEntry.accumulatedHours = (gameEntry.accumulatedHours || 0) + hours;
+        await payment.save();
+
+        res.json({
+            success: true,
+            message: `Added ${hours} hours`,
+            accumulatedHours: gameEntry.accumulatedHours
+        });
+
+    } catch (error) {
+        console.error("Add Playtime Error:", error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ success: false, message: 'Invalid Token' });
+        }
+        res.status(500).json({ success: false, message: 'Server Error adding playtime' });
+    }
+};
+
+module.exports = { getGames, buyGames, getTopGames, getGamesByTags, getGameById, getUserLibrary, addPlaytime };

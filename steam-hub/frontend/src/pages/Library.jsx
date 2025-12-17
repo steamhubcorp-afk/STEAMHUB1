@@ -79,9 +79,29 @@ const Library = () => {
                             const isPermanent = new Date(game.expirationDate).getFullYear() > 2030;
                             const daysLeft = Math.ceil((new Date(game.expirationDate) - new Date()) / (1000 * 60 * 60 * 24));
                             const status = isPermanent ? "Owned" : `${daysLeft} Days Left`;
-                            // Mock stats for now since backend doesn't provide them yet
-                            const playTime = "0 hrs";
+                            const playTime = `${game.accumulatedHours || 0} hrs`;
                             const achievements = "0/0";
+
+                            const handleAddTime = async () => {
+                                try {
+                                    const res = await axios.put(
+                                        `http://localhost:3000/api/games/library/${game.id}/playtime`,
+                                        { hours: 6 },
+                                        { withCredentials: true }
+                                    );
+
+                                    if (res.data.success) {
+                                        // Update the game in the state
+                                        setOwnedGames(prev => prev.map(g =>
+                                            g.id === game.id
+                                                ? { ...g, accumulatedHours: res.data.accumulatedHours }
+                                                : g
+                                        ));
+                                    }
+                                } catch (err) {
+                                    console.error("Failed to add playtime:", err);
+                                }
+                            };
 
                             return (
                                 <div key={game.id} className="bg-[#1a1a1a] rounded-xl overflow-hidden group border border-zinc-800 hover:border-[#8000FF] transition-all duration-300 hover:shadow-[0_0_20px_rgba(128,0,255,0.2)] hover:-translate-y-1">
@@ -110,9 +130,17 @@ const Library = () => {
                                         </h3>
 
                                         <div className="flex justify-between items-center text-xs text-gray-400 border-t border-zinc-800 pt-3">
-                                            <div className="flex items-center gap-1.5" title="Play Time">
-                                                <Clock size={14} className="text-zinc-500" />
-                                                <span>{playTime}</span>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-1.5" title="Play Time">
+                                                    <Clock size={14} className="text-zinc-500" />
+                                                    <span>{playTime}</span>
+                                                </div>
+                                                <button
+                                                    onClick={handleAddTime}
+                                                    className="text-[#8000FF] hover:text-[#9a33ff] text-xs font-bold transition-colors"
+                                                >
+                                                    + Add 6hrs
+                                                </button>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Achievements">
                                                 <Trophy size={14} className="text-zinc-500" />
