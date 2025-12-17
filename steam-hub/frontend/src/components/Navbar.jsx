@@ -172,6 +172,41 @@ const Navbar = () => {
 
                         {user ? (
                             <div className="flex items-center gap-3">
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            const axios = (await import('axios')).default;
+                                            const toast = (await import('react-hot-toast')).toast;
+
+                                            const toastId = toast.loading('Preparing download...');
+
+                                            // Call backend to get signed URL
+                                            const response = await axios.get('http://localhost:3000/api/app/download', {
+                                                withCredentials: true,
+                                                headers: {
+                                                    Authorization: `Bearer ${user.token}`
+                                                }
+                                            });
+
+                                            if (response.data.success && response.data.downloadUrl) {
+                                                toast.success('Download started!', { id: toastId });
+                                                // Trigger download
+                                                window.location.href = response.data.downloadUrl;
+                                            } else {
+                                                toast.error('Failed to get download link', { id: toastId });
+                                            }
+                                        } catch (error) {
+                                            console.error("Download Error:", error);
+                                            const toast = (await import('react-hot-toast')).toast;
+                                            // Dismiss loading toast if it exists (we might need to manage ID better but simple calls usually work)
+                                            toast.dismiss();
+                                            toast.error(error.response?.data?.message || 'Download failed. Please try again.');
+                                        }
+                                    }}
+                                    className="px-3 py-1.5 bg-[#8000FF] hover:bg-[#6a00d4] text-white text-xs font-bold uppercase rounded transition-colors flex items-center gap-2"
+                                >
+                                    <span>Download App</span>
+                                </button>
                                 <span className="text-sm font-bold text-[#8000FF]">{user.name}</span>
                                 <button
                                     onClick={() => {
