@@ -1,4 +1,5 @@
 import React from 'react';
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import TopGames from './pages/TopGames';
@@ -20,6 +21,12 @@ function App() {
             <CartProvider>
                 <Router>
                     <Layout>
+                        <Toaster position="top-center" toastOptions={{
+                            style: {
+                                background: '#333',
+                                color: '#fff',
+                            },
+                        }} />
                         <AuthModal />
                         <Routes>
                             <Route path="/" element={<Navigate to="/top-games" replace />} />

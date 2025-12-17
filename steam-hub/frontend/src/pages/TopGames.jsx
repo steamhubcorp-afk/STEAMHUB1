@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Play, Users, ShieldCheck, Gamepad2, ShoppingCart, LifeBuoy } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 import axios from 'axios';
 
 const TopGames = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     // Game Data State
     const [games, setGames] = useState([]);
@@ -139,7 +141,7 @@ const TopGames = () => {
                                         <p className="text-gray-200 text-lg md:text-xl font-medium tracking-wide mb-6 drop-shadow-lg">
                                             {game.subtitle}
                                         </p>
-                                        <button className="group flex items-center gap-3 bg-white text-black px-8 py-3 rounded-sm font-black uppercase tracking-wider hover:bg-[#ff3366] hover:text-white transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(255,51,102,0.6)]">
+                                        <button onClick={() => navigate(`/game/${game.id}`)} className="group flex items-center gap-3 bg-white text-black px-8 py-3 rounded-sm font-black uppercase tracking-wider hover:bg-[#ff3366] hover:text-white transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(255,51,102,0.6)]">
                                             <span className="relative">Available Now</span>
                                             <ArrowRight size={20} className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                         </button>
@@ -308,7 +310,7 @@ const TopGames = () => {
                         <p className="text-gray-300 text-lg md:text-xl font-medium mb-8 leading-relaxed max-w-lg drop-shadow-lg">
                             All Rockstar Games titles, from upcoming releases like Grand Theft Auto VI to the classics.
                         </p>
-                        <button className="group flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-400 transition-colors shadow-lg">
+                        <button onClick={() => navigate('/store')} className="group flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-yellow-400 transition-colors shadow-lg">
                             <span>View All</span>
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -345,7 +347,7 @@ const TopGames = () => {
                                 image: "https://placehold.co/1920x1080/202020/FFFFFF/png?text=VIDEO+THUMBNAIL" // Placeholder as requested
                             }
                         ].map((item, i) => (
-                            <div key={i} className="group cursor-pointer">
+                            <div key={i} onClick={() => navigate('/how-to-use')} className="group cursor-pointer">
                                 <div className="relative overflow-hidden rounded-lg mb-4 aspect-video bg-[#202020]">
                                     <img
                                         src={item.image}
@@ -395,7 +397,7 @@ const TopGames = () => {
                         Get help with issues, browse common solutions, view service status updates, and more.
                     </p>
 
-                    <button className="bg-white text-black px-10 py-3 rounded-full font-bold text-xl hover:bg-[#8000FF] hover:text-white hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(128,0,255,0.4)] flex items-center gap-3 mx-auto">
+                    <button onClick={() => navigate('/support')} className="bg-white text-black px-10 py-3 rounded-full font-bold text-xl hover:bg-[#8000FF] hover:text-white hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_50px_rgba(128,0,255,0.4)] flex items-center gap-3 mx-auto">
                         <span>Get Support</span>
                         <ArrowRight className="w-6 h-6" />
                     </button>

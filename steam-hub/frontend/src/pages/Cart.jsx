@@ -115,21 +115,6 @@ const Cart = () => {
                                                     </span>
                                                     <span className="bg-zinc-800 px-3 py-1 rounded text-xs">PC Edition</span>
                                                 </div>
-
-                                                {/* Quantity / Device Selector */}
-                                                <div className="flex items-center gap-2 bg-zinc-900 px-3 py-2 rounded border border-zinc-700 w-fit">
-                                                    <Monitor size={14} className="text-gray-400" />
-                                                    <label className="text-xs text-gray-400 mr-1">Devices:</label>
-                                                    <select
-                                                        value={item.qty}
-                                                        onChange={(e) => updateQty(item.id, item.duration, e.target.value)}
-                                                        className="bg-transparent text-white font-bold outline-none cursor-pointer text-sm"
-                                                    >
-                                                        {[...Array(10)].map((_, i) => (
-                                                            <option key={i + 1} value={i + 1} className="bg-zinc-900">{i + 1}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
                                             </div>
                                         </div>
 
