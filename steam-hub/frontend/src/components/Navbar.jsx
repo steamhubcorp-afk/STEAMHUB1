@@ -31,9 +31,11 @@ const Navbar = () => {
                             <Link to="/store" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
                                 Store
                             </Link>
-                            <Link to="/library" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
-                                Library
-                            </Link>
+                            {user && (
+                                <Link to="/library" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
+                                    Library
+                                </Link>
+                            )}
                             <Link to="/support" className="hover:text-[#8000FF] transition-colors px-3 py-2 rounded-md text-sm font-medium uppercase tracking-wide">
                                 Support
                             </Link>
@@ -50,8 +52,12 @@ const Navbar = () => {
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-bold text-[#8000FF]">{user.name}</span>
                                 <button
-                                    onClick={logout}
-                                    className="text-xs uppercase font-bold text-gray-500 hover:text-white transition-colors"
+                                    onClick={() => {
+                                        if (window.confirm("Are you sure you want to logout?")) {
+                                            logout();
+                                        }
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-800 flex items-center gap-2"
                                 >
                                     Logout
                                 </button>
@@ -92,9 +98,11 @@ const Navbar = () => {
                         <Link to="/store" onClick={() => setIsOpen(false)} className="block hover:bg-gray-800 hover:text-[#8000FF] px-3 py-2 rounded-md text-base font-medium uppercase">
                             Store
                         </Link>
-                        <Link to="/library" onClick={() => setIsOpen(false)} className="block hover:bg-gray-800 hover:text-[#8000FF] px-3 py-2 rounded-md text-base font-medium uppercase">
-                            Library
-                        </Link>
+                        {user && (
+                            <Link to="/library" onClick={() => setIsOpen(false)} className="block hover:bg-gray-800 hover:text-[#8000FF] px-3 py-2 rounded-md text-base font-medium uppercase">
+                                Library
+                            </Link>
+                        )}
                         <Link to="/support" onClick={() => setIsOpen(false)} className="block hover:bg-gray-800 hover:text-[#8000FF] px-3 py-2 rounded-md text-base font-medium uppercase">
                             Support
                         </Link>

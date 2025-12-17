@@ -36,12 +36,15 @@ export const AuthProvider = ({ children }) => {
                 email,
                 password,
                 machineId
-            });
+            }, { withCredentials: true });
 
             if (response.data.success) {
                 // Login Successful
+                // Login Successful
                 setUser({
                     email,
+                    id: response.data.user ? response.data.user.id : (response.data.token ? JSON.parse(atob(response.data.token.split('.')[1])).id : null),
+                    token: response.data.token,
                     ...response.data.config
                 });
                 closeModal();
@@ -62,7 +65,7 @@ export const AuthProvider = ({ children }) => {
                 name,
                 email,
                 password
-            });
+            }, { withCredentials: true });
 
             if (response.data.success) {
                 // Signup Successful - usually we don't auto-login if verification needed
@@ -78,6 +81,26 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const googleLogin = (credentialResponse) => {
+        try {
+            const token = credentialResponse.credential;
+            // Decode the JWT to get user info (simple base64 decode for frontend usage)
+            // Note: In production, verify this token on backend for security
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+
+            setUser({
+                name: decoded.name,
+                email: decoded.email,
+                image: decoded.picture,
+                isGoogle: true
+            });
+            closeModal();
+        } catch (err) {
+            console.error("Google Login Error:", err);
+            setError("Failed to process Google Login");
+        }
+    };
+
     const logout = () => {
         setUser(null);
         // Optional: Call release endpoint if needed, but user said don't touch machine logic
@@ -90,6 +113,7 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         signup,
+        googleLogin,
         logout,
         isLoading,
         error

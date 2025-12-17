@@ -1,5 +1,8 @@
 const Game = require('../models/Game');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Library = require('../models/Library');
+const Payment = require('../models/Payment');
 const { generateUserPayload } = require('../services/payloadService');
 
 // @desc    Get All Games
@@ -10,6 +13,99 @@ const getGames = async (req, res) => {
         res.json({ success: true, games });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};
+
+// @desc    Get User Library
+// @route   GET /api/games/library
+const getUserLibrary = async (req, res) => {
+    // 1. Get Token from Cookie
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Not authorized (No Token)' });
+    }
+
+    try {
+        // 2. Verify Token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key_123');
+        const userId = decoded.id;
+
+        // 3. Fetch Payments (Source of Truth) sorted by Date ASC to calculate extensions correctly
+        const payments = await Payment.find({ user: userId, status: 'completed' })
+            .sort({ createdAt: 1 })
+            .populate('games.game');
+
+        // 4. Calculate Sync State
+        const libraryState = new Map(); // gameId -> { expirationDate, gameObj }
+
+        payments.forEach(payment => {
+            payment.games.forEach(item => {
+                if (!item.game) return;
+
+                const gameId = item.game._id.toString();
+                const purchaseDate = new Date(payment.createdAt);
+                const durationMs = item.hours * 60 * 60 * 1000;
+
+                // Logic: 
+                // If game exists in map and is NOT expired at the time of this new purchase -> Extend it.
+                // If game exists but expired -> Restart from purchase date.
+                // If game not in map -> Start from purchase date.
+
+                let currentExp = 0;
+                if (libraryState.has(gameId)) {
+                    currentExp = libraryState.get(gameId).expirationDate.getTime();
+                }
+
+                let newExp;
+                if (currentExp > purchaseDate.getTime()) {
+                    // Active -> Extend
+                    newExp = new Date(currentExp + durationMs);
+                } else {
+                    // Expired or New -> Start Fresh
+                    newExp = new Date(purchaseDate.getTime() + durationMs);
+                }
+
+                libraryState.set(gameId, {
+                    expirationDate: newExp,
+                    game: item.game
+                });
+            });
+        });
+
+        // 5. Update Library Database
+        let library = await Library.findOne({ user: userId });
+        if (!library) {
+            library = new Library({ user: userId, games: [] });
+        }
+
+        // Rebuild library games list
+        library.games = Array.from(libraryState.entries()).map(([id, data]) => ({
+            game: id,
+            expirationDate: data.expirationDate,
+            isActive: data.expirationDate > new Date()
+        }));
+
+        await library.save();
+
+        // 6. Return Populated Data for Frontend
+        const games = Array.from(libraryState.values())
+            .filter(data => data.expirationDate > new Date()) // Only return active to frontend
+            .map(data => ({
+                id: data.game._id,
+                title: data.game.name,
+                image: data.game.images.main || data.game.images.banner,
+                expirationDate: data.expirationDate
+            }));
+
+        res.json({ success: true, games });
+
+    } catch (error) {
+        console.error("Get Library Error:", error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ success: false, message: 'Invalid Token' });
+        }
+        res.status(500).json({ success: false, message: 'Server Error fetching library' });
     }
 };
 
@@ -125,4 +221,4 @@ const getGameById = async (req, res) => {
     }
 };
 
-module.exports = { getGames, buyGames, getTopGames, getGamesByTags, getGameById };
+module.exports = { getGames, buyGames, getTopGames, getGamesByTags, getGameById, getUserLibrary };

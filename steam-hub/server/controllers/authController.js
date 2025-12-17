@@ -2,6 +2,7 @@ const User = require('../models/User');
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('../config/brevo');
 const { OAuth2Client } = require('google-auth-library');
+const jwt = require('jsonwebtoken');
 
 // Start Google Client (Client ID should be in env, but for now we won't verify strictly if not provided)
 // const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -147,9 +148,26 @@ const verify = async (req, res) => {
             endDate = new Date(startTime.getTime() + user.limitMinutes * 60000).toISOString();
         }
 
+        // --- NEW: Generate and Save Token ---
+        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET || 'secret_key_123', {
+            expiresIn: '30d'
+        });
+
+        user.token = token;
+        await user.save();
+
+        // Send Token in Cookie
+        const options = {
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            httpOnly: true, // Not accessible via JS
+            // secure: true // Add in production (HTTPS)
+        };
+        res.cookie('token', token, options);
+
         res.json({
             success: true,
             message: 'Verified',
+            token: token, // Send in body as well
             config: {
                 type: user.licenseType,
                 limit: user.limitMinutes,
