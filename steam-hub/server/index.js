@@ -25,7 +25,7 @@ app.use('/api', require('./routes/authRoutes'));
 app.use('/api/app', require('./routes/appRoutes'));
 app.use('/api/games', require('./routes/gameRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/support', require('./routes/supportRoutes'));
 app.get('/health', (req, res) => {
   res.send('OK');
 })

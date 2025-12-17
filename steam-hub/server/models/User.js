@@ -33,6 +33,11 @@ const userSchema = mongoose.Schema({
     library: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Library'
+    },
+    // Single active session enforcement (Linked to DeviceActivity)
+    activeSession: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'DeviceActivity'
     }
 }, {
     timestamps: true
