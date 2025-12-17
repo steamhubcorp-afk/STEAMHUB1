@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -47,11 +48,14 @@ export const AuthProvider = ({ children }) => {
                     token: response.data.token,
                     ...response.data.config
                 });
+                toast.success(`Welcome back, ${response.data.user?.name || 'User'}!`);
                 closeModal();
             }
         } catch (err) {
             console.error("Login Error:", err);
-            setError(err.response?.data?.message || "Login failed");
+            const errorMsg = err.response?.data?.message || "Login failed";
+            setError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -70,11 +74,14 @@ export const AuthProvider = ({ children }) => {
             if (response.data.success) {
                 // Signup Successful - usually we don't auto-login if verification needed
                 // Just return true or let the component know to show a success message
+                toast.success("Account created successfully! Please login.");
                 return true;
             }
         } catch (err) {
             console.error("Signup Error:", err);
-            setError(err.response?.data?.message || "Signup failed");
+            const errorMsg = err.response?.data?.message || "Signup failed";
+            setError(errorMsg);
+            toast.error(errorMsg);
             return false;
         } finally {
             setIsLoading(false);
@@ -94,15 +101,18 @@ export const AuthProvider = ({ children }) => {
                 image: decoded.picture,
                 isGoogle: true
             });
+            toast.success("Logged in with Google!");
             closeModal();
         } catch (err) {
             console.error("Google Login Error:", err);
             setError("Failed to process Google Login");
+            toast.error("Google Login failed");
         }
     };
 
     const logout = () => {
         setUser(null);
+        toast.success("Logged out successfully");
         // Optional: Call release endpoint if needed, but user said don't touch machine logic
     };
 

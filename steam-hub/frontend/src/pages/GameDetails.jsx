@@ -53,42 +53,21 @@ const GameDetails = () => {
                 {/* LEFT: 70% Content Section */}
                 <div className="lg:col-span-7 space-y-12">
 
-                    {/* Hero Image */}
+                    {/* Hero Image (Clean) */}
                     <div className="h-[50vh] lg:h-[70vh] rounded-2xl overflow-hidden shadow-2xl relative border border-zinc-800">
                         <img
                             src={game.images?.main || game.images?.banner}
                             alt={game.name}
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent opacity-80" />
-
-                        <div className="absolute bottom-8 left-8">
-                            <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter drop-shadow-2xl mb-2">
-                                {game.name}
-                            </h1>
-                            <div className="flex gap-2">
-                                {game.tags?.map((tag, index) => (
-                                    <span key={index} className="bg-zinc-900/80 text-gray-300 px-3 py-1 rounded text-xs font-bold uppercase backdrop-blur-sm border border-zinc-700">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent opacity-40" />
                     </div>
 
-                    {/* Description */}
+                    {/* Description (Long Form) */}
                     <div className="bg-[#1a1a1a] rounded-xl p-8 border border-zinc-800">
                         <h2 className="text-2xl font-bold mb-4 text-[#8000FF] uppercase tracking-wide">Description</h2>
                         <p className="text-gray-300 leading-relaxed text-lg">
                             {game.description}
-                        </p>
-                    </div>
-
-                    {/* About This Game */}
-                    <div className="bg-[#1a1a1a] rounded-xl p-8 border border-zinc-800">
-                        <h2 className="text-2xl font-bold mb-4 text-[#8000FF] uppercase tracking-wide">About This Game</h2>
-                        <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-                            {game.about}
                         </p>
                     </div>
 
@@ -161,19 +140,35 @@ const GameDetails = () => {
                 <div className="lg:col-span-3 space-y-6">
                     <div className="sticky top-24 space-y-6">
 
-                        {/* Game Logo/Title Card */}
-                        <div className="bg-[#1a1a1a] rounded-xl p-6 border border-zinc-800 text-center">
-                            <img src={game.images?.logo || game.images?.banner} alt="Logo" className="w-3/4 mx-auto mb-4 object-contain" />
-                            <div className="flex justify-center items-center gap-2 mb-2">
-                                <span className="bg-[#8000FF] text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wide">
-                                    Available Now
-                                </span>
+                        {/* Title & Platform Section (Moved from Left Hero) */}
+                        <div className="bg-[#1a1a1a] rounded-xl p-6 border border-zinc-800">
+                            <div className="flex items-center gap-2 mb-2 text-gray-400 text-xs uppercase tracking-wider">
+                                <Monitor size={14} />
+                                <span>Platform: Windows</span>
                             </div>
+                            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 leading-none">
+                                {game.name}
+                            </h1>
+                            <div className="flex flex-wrap gap-2">
+                                {game.tags?.map((tag, index) => (
+                                    <span key={index} className="bg-zinc-800 text-gray-300 px-3 py-1 rounded text-xs font-bold uppercase border border-zinc-700">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* About This Game (Moved from Left) */}
+                        <div className="bg-[#1a1a1a] rounded-xl p-6 border border-zinc-800">
+                            <h2 className="text-lg font-bold mb-3 text-[#8000FF] uppercase tracking-wide">About</h2>
+                            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
+                                {game.about}
+                            </p>
                         </div>
 
                         {/* Purchase Card */}
                         <div className="bg-[#202020] rounded-xl p-6 border-2 border-zinc-800 shadow-2xl relative overflow-hidden">
-                            <h3 className="text-xl font-bold mb-6 text-white text-center">Buy {game.name}</h3>
+                            <h3 className="text-xl font-bold mb-6 text-white text-center">Buy Now</h3>
 
                             <div className="bg-[#151515] p-6 rounded-lg border border-zinc-700 hover:border-[#8000FF] transition-colors group mb-6">
                                 <div className="flex justify-between items-center mb-2">
